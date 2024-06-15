@@ -52,6 +52,18 @@ func getRegisteredUsers(context *gin.Context) {
 		return
 	}
 
+	event, err := models.GetEventById(eventId)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch the event."})
+		return
+	}
+
+	userId := context.GetInt64("userId")
+	if event.UserID != userId {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "Not authorized to get user list for event."})
+		return
+	}
+
 	dictUsers, err := models.GetUsersForEvent(eventId)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch registered users for the event. Try again later."})
