@@ -45,6 +45,22 @@ func getYourEvents(context *gin.Context) {
 	context.JSON(http.StatusOK, events)
 }
 
+func getRegisteredUsers(context *gin.Context) {
+	eventId, err := strconv.ParseInt(context.Param("id"), 10, 64)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse event id."})
+		return
+	}
+
+	dictUsers, err := models.GetUsersForEvent(eventId)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch registered users for the event. Try again later."})
+		return
+	}
+
+	context.JSON(http.StatusOK, dictUsers)
+}
+
 func createEvent(context *gin.Context) {
 	var event models.Event
 	err := context.ShouldBindJSON(&event)
