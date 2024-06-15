@@ -80,6 +80,30 @@ func GetYourEvents(userId int64) (*[]Event, error) {
 	return &events, nil
 }
 
+func GetUsersForEvent(eventId int64) (*map[int]string, error) {
+	query := "SELECT r.user_id, u.email FROM registrations r INNER JOIN users u ON r.user_id = u.id WHERE r.event_id = ?"
+	rows, err := db.DB.Query(query, eventId)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	dictUsers := make(map[int]string)
+	for rows.Next() {
+		var id int
+		var email string
+		err := rows.Scan(&id, &email)
+		if err != nil {
+			return nil, err
+		}
+
+		dictUsers[id] = email
+	}
+
+	return &dictUsers, nil
+}
+
 func GetEventById(id int64) (*Event, error) {
 	query := "SELECT * FROM events WHERE id = ?"
 	row := db.DB.QueryRow(query, id)
